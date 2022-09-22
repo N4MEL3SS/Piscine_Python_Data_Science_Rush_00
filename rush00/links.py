@@ -7,8 +7,8 @@ class Links:
 
     def __init__(self, path_to_the_file):
         try:
-            with open(path_to_the_file, 'r') as file:
-                self.file_data = file.readlines()
+            with open(path_to_the_file, 'r', encoding='utf-8') as file:
+                self.file_data = file
         except FileNotFoundError as err:
             print(err)
 
@@ -20,6 +20,9 @@ The method returns a list of lists [movieId, field1, field2, field3, ...] for th
         The values should be parsed from the IMDB webpages of the movies.
      Sort it by movieId descendingly.
         """
+
+        print()
+
         return imdb_info
 
     def top_directors(self, n):

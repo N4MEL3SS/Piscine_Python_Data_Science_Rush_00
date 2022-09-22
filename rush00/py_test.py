@@ -1,7 +1,8 @@
-import links
-import movies
-import ratings
-import tags
+from links import Links
+from movies import Movies
+from ratings import Ratings
+from tags import Tags
+import config
 
 
 class Test:
@@ -19,7 +20,9 @@ class Test:
 
 
 def main():
-    pass
+    file_path = "../dataset/ratings.csv"
+    rating_class = Ratings(file_path)
+    print(rating_class.Movies.dist_by_year())
 
 
 if __name__ == '__main__':
