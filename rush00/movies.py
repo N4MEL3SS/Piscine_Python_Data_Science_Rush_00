@@ -1,6 +1,6 @@
 #irina
 from collections import Counter
-import re
+
 
 class Movies:
     """
@@ -50,7 +50,7 @@ class Movies:
         lines = self.split_line()
         years = [line[1][-5:-1] if line[1][-1] == ')' else 'no year' for line in lines]
         release_years = self.count_sort(years)
-        print(release_years)
+        # print(release_years)
         return release_years
 
     def dist_by_genres(self):
@@ -64,9 +64,8 @@ class Movies:
             genre = line[2].strip('()').split('|')
             for g in genre:
                 genres_lst.append(g)
-        # print(genres)
         genres = self.count_sort(genres_lst)
-        print(genres)
+        # print(genres)
         return genres
 
     def most_genres(self, n):
@@ -75,12 +74,18 @@ class Movies:
         the values are the number of genres of the movie. Sort it by numbers descendingly.
         """
 
-        # return movies
-
-
-
-if __name__ == '__main__':
-    movies = Movies('../dataset/movies.csv')
-    movies.dist_by_release()
-    movies.dist_by_genres()
-    movies.most_genres(10)
+        movie_dict = dict()
+        lines = self.split_line()
+        for line in lines:
+            if line[1][-1] == ')':
+                key = line[1][:-7]
+            else:
+                key = line[1]
+            value = len(line[2].strip('()').split('|'))
+            movie_dict[key] = value
+        dct_sorted = dict(sorted(movie_dict.items(), key=lambda x: x[1], reverse=True))
+        keys = list(dct_sorted.keys())[:n]
+        values = list(dct_sorted.values())[:n]
+        movies = dict(zip(keys, values))
+        # print(movies)
+        return movies
