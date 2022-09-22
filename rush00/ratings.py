@@ -1,3 +1,5 @@
+#salavat
+
 class Ratings:
     """
     Analyzing data from ratings.csv

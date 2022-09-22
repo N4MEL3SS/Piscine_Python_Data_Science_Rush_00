@@ -1,12 +1,17 @@
+#salavat
+
 class Links:
     """
     Analyzing data from links.csv
     """
 
     def __init__(self, path_to_the_file):
-        """
-        Put here any fields that you think you will need.
-        """
+        try:
+            with open(path_to_the_file, 'r') as file:
+                return file.readlines()
+        except FileNotFoundError as err:
+            print(err)
+
 
     def get_imdb(list_of_movies, list_of_fields):
         """
