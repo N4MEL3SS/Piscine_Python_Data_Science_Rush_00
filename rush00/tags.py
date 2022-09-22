@@ -6,9 +6,11 @@ class Tags:
     """
 
     def __init__(self, path_to_the_file):
-        """
-        Put here any fields that you think you will need.
-        """
+        try:
+            with open(path_to_the_file, 'r') as file:
+                self.file_data = file.readlines()
+        except FileNotFoundError as err:
+            print(err)
 
     def most_words(self, n):
         """

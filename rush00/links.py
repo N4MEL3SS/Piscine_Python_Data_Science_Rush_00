@@ -8,7 +8,7 @@ class Links:
     def __init__(self, path_to_the_file):
         try:
             with open(path_to_the_file, 'r') as file:
-                return file.readlines()
+                self.file_data = file.readlines()
         except FileNotFoundError as err:
             print(err)
 
