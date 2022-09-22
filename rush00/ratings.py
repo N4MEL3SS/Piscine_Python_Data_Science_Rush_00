@@ -1,4 +1,4 @@
-#salavat
+#  salavat
 
 class Ratings:
     """
