@@ -3,6 +3,19 @@ from movies import Movies
 from ratings import Ratings
 from tags import Tags
 
+import os
+import sys
+import urllib
+import requests
+from bs4 import BeautifulSoup as soup
+import json
+import pytest
+import collections
+import functools
+import datetime
+import re
+
+
 # Удалить перед сдачей
 import timeit
 import psutil
@@ -54,18 +67,22 @@ def main():
 
     movies_class = Movies(movies_path)
     # links_class = Links(links_path)
-    # ratings_class = Ratings(ratings_path)
+    ratings_class = Ratings(ratings_path)
     # tags_class = Tags(tags_path)
 
-    print(movies_class.dist_by_release())
-    print(movies_class.dist_by_genres())
-    print(movies_class.most_genres(10))
+    # print(movies_class.dist_by_release())
+    # print(movies_class.dist_by_genres())
+    # print(movies_class.most_genres(10))
 
+    rating_movies_subclass = ratings_class.Movies(ratings_class)
+    # print(rating_movies_subclass.dist_by_year())
+    print(rating_movies_subclass.dist_by_rating())
+
+    print("\nSystem resources:")
     mem_rss = psutil.Process().memory_info().rss / float(2 ** 30)
     mem_vms = psutil.Process().memory_info().vms / float(2 ** 30)
     cpu = psutil.Process().cpu_times()
 
-    print()
     print(f'Peak Real Memory Usage = {mem_rss:0.3f} Gb')
     print(f'Peak Virtual Memory Usage = {mem_vms:0.3f} Gb')
     print(f'User Time + System Time = {cpu.user + cpu.system:0.2f}s')

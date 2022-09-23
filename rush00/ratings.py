@@ -1,4 +1,7 @@
 #  salavat
+import datetime
+from collections import Counter
+
 
 class Ratings:
     # Analyzing data from ratings.csv
@@ -24,19 +27,37 @@ class Ratings:
     def get_file(self):
         return self.file_data
 
+    def lst_sort(self, lst, key, reverse=False):
+        return dict(sorted(Counter(lst).items(), key=lambda x: x[key], reverse=reverse))
+
     class Movies:
+        def __init__(self, ratings):
+            self.ratings = ratings
+
         # The method returns a dict where the keys are years and the values are counts.
         # Sort it by years ascendingly. You need to extract years from timestamps.
         def dist_by_year(self):
-            ratings_by_year = {}
-            print(Ratings.get_file().readlines)
+            years = []
+            for line in self.ratings.file_data[1:]:
+                timestamp = int(line.rsplit(',', maxsplit=1)[1].rstrip())
+                data = datetime.datetime.fromtimestamp(timestamp)
+                years.append(str(data)[:4])
+
+            # years = [str(datetime.datetime.fromtimestamp(int(line.rsplit(',', maxsplit=1)[1].rstrip())))[:4] for
+            # line in self.ratings.file_data[1:]]
+
+            ratings_by_year = self.ratings.lst_sort(years, 0)
 
             return ratings_by_year
 
         # The method returns a dict where the keys are ratings and the values are counts.
         # Sort it by ratings ascendingly.
         def dist_by_rating(self):
-            ratings_distribution = {}
+            ratings_list = []
+            for line in self.ratings.file_data[1:]:
+                ratings_list.append(line.rsplit(',', maxsplit=2)[1].rstrip())
+
+            ratings_distribution = self.ratings.lst_sort(ratings_list, 1)
 
             return ratings_distribution
 
@@ -52,7 +73,7 @@ class Ratings:
         # It is a dict where the keys are movie titles and the values are metric values.
         # Sort it by metric descendingly.
         # The values should be rounded to 2 decimals.
-        def top_by_ratings(self, n, metric=average):
+        def top_by_ratings(self, n, metric=True):  # average
             top_movies = {}
 
             return top_movies
