@@ -1,6 +1,7 @@
 #  salavat
 import datetime
 from collections import Counter
+from movies import Movies
 
 
 class Ratings:
@@ -41,8 +42,9 @@ class Ratings:
         return dict(sorted(Counter(lst).items(), key=lambda x: x[key], reverse=reverse))
 
     class Movies:
-        def __init__(self, ratings):
+        def __init__(self, ratings, movie_title):
             self.ratings = ratings
+            self.movie_title = movie_title
 
         # The method returns a dict where the keys are years and the values are counts.
         # Sort it by years ascendingly. You need to extract years from timestamps.
@@ -80,7 +82,12 @@ class Ratings:
                 movies_id.append(line.split(',', maxsplit=2)[1].rstrip())
             # print(movies_id)
 
-            top_movies = self.ratings.lst_sort(movies_id, 1, True)
+            top_movies = {}
+            for key, value in Counter(movies_id).most_common(n):
+                if self.movie_title.get(key):
+                    top_movies[self.movie_title[key]] = value
+                else:
+                    raise Exception("Undefined movieID!")
 
             return top_movies
 
@@ -88,8 +95,27 @@ class Ratings:
         # It is a dict where the keys are movie titles and the values are metric values.
         # Sort it by metric descendingly.
         # The values should be rounded to 2 decimals.
-        def top_by_ratings(self, n, metric=True):  # average
+        def top_by_ratings(self, n, metric='average'):
             top_movies = {}
+
+            dict_test = {}
+            temp_list = [line.split(',') for line in self.ratings.file_data]
+            temp_list.sort(key=lambda x: x[1])
+            print(temp_list[:5])
+
+            temp_movie_id = temp_list[0][1]
+            for temp in temp_list:
+                movie_id, rating_score = temp[1], float(temp[2])
+                if movie_id != temp_movie_id:
+                    dict_test[temp_movie_id] = round(dict_test[temp_movie_id][0] / dict_test[temp_movie_id][1], 2)
+                    temp_movie_id = movie_id
+                if dict_test.get(movie_id):
+                    dict_test[movie_id] = [dict_test[movie_id][0] + rating_score, dict_test[movie_id][1] + 1]
+                    # print(movie_id, dict_test[movie_id])
+                else:
+                    dict_test[movie_id] = [rating_score, 1]
+                    # print(movie_id, dict_test[movie_id])
+                print(dict_test)
 
             return top_movies
 

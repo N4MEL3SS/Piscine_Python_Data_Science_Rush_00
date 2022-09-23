@@ -70,14 +70,17 @@ def main():
     ratings_class = Ratings(ratings_path)
     # tags_class = Tags(tags_path)
 
-    print(movies_class.dist_by_release())
-    print(movies_class.dist_by_genres())
-    print(movies_class.most_genres(10))
+    # print("Movie class:")
+    # print(movies_class.dist_by_release())
+    # print(movies_class.dist_by_genres())
+    # print(movies_class.most_genres(10))
 
-    rating_movies_subclass = ratings_class.Movies(ratings_class)
-    print(rating_movies_subclass.dist_by_year())
-    print(rating_movies_subclass.dist_by_rating())
+    rating_movies_subclass = ratings_class.Movies(ratings_class, movies_class.get_movies_title())
+    print("\nRating class:")
+    # print(rating_movies_subclass.dist_by_year())
+    # print(rating_movies_subclass.dist_by_rating())
     # print(rating_movies_subclass.top_by_num_of_ratings(10))
+    print(rating_movies_subclass.top_by_ratings(30))
 
     print("\nSystem resources:")
     mem_rss = psutil.Process().memory_info().rss / float(2 ** 30)

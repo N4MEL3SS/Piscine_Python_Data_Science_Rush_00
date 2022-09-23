@@ -34,6 +34,22 @@ class Movies:
         except FileNotFoundError as err:
             print(err)
 
+    def get_movies_title(self):
+        movie_title_dict = {}
+
+        for line in self.file_data:
+            movie_id = line[:line.find(',')]
+            title = line[line.find(',') + 1:line.rfind(',')].strip('" ')
+
+            if re.findall(r'\(\d{4}\)', title):
+                title = title[:-7]
+            elif re.findall(r'\(\d{4}–\d{4}\)', title):
+                title = title[:-12]
+
+            movie_title_dict[movie_id] = title
+
+        return movie_title_dict
+
     def split_line(self):
         def split_one(row):
             l = []
