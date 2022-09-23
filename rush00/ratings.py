@@ -8,19 +8,29 @@ class Ratings:
 
     def __init__(self, path_to_the_file, has_order=True):
         self.path_file = path_to_the_file
-
+        self.header = ('userId,movieId,rating,timestamp')
         if has_order:
-            try:
-                with open(path_to_the_file, 'r', encoding='utf-8') as file:
-                    self.file_data = file.readlines()
-            except FileNotFoundError as err:
-                print(err)
+            self.file_data = self.file_open_ordinary()
+            self.file_data = [self.file_data[i].rstrip('\n') for i in range(0, len(self.file_data))]
+        else:
+            self.file_data = self.file_open_generator()
 
-    def file_open(self):
+    def file_open_generator(self):
         try:
             with open(self.path_file, 'r', encoding='utf-8') as file:
+                if file.readline().rstrip() != self.header:
+                    raise Exception("File structure error!")
                 for line in file:
-                    yield line
+                    yield line.rstrip("\n")
+        except FileNotFoundError as err:
+            print(err)
+
+    def file_open_ordinary(self):
+        try:
+            with open(self.path_file, 'r', encoding='utf-8') as file:
+                if file.readline().rstrip() != self.header:
+                    raise Exception("File structure error!")
+                return file.readlines()
         except FileNotFoundError as err:
             print(err)
 
@@ -38,13 +48,13 @@ class Ratings:
         # Sort it by years ascendingly. You need to extract years from timestamps.
         def dist_by_year(self):
             years = []
-            for line in self.ratings.file_data[1:]:
+            for line in self.ratings.file_data:
                 timestamp = int(line.rsplit(',', maxsplit=1)[1].rstrip())
                 data = datetime.datetime.fromtimestamp(timestamp)
                 years.append(str(data)[:4])
 
             # years = [str(datetime.datetime.fromtimestamp(int(line.rsplit(',', maxsplit=1)[1].rstrip())))[:4] for
-            # line in self.ratings.file_data[1:]]
+            #     line in self.ratings.file_data[1:]]
 
             ratings_by_year = self.ratings.lst_sort(years, 0)
 
@@ -54,7 +64,7 @@ class Ratings:
         # Sort it by ratings ascendingly.
         def dist_by_rating(self):
             ratings_list = []
-            for line in self.ratings.file_data[1:]:
+            for line in self.ratings.file_data:
                 ratings_list.append(line.rsplit(',', maxsplit=2)[1].rstrip())
 
             ratings_distribution = self.ratings.lst_sort(ratings_list, 1)
@@ -65,7 +75,12 @@ class Ratings:
         # It is a dict where the keys are movie titles and the values are numbers.
         # Sort it by numbers descendingly.
         def top_by_num_of_ratings(self, n):
-            top_movies = {}
+            movies_id = []
+            for line in self.ratings.file_data:
+                movies_id.append(line.split(',', maxsplit=2)[1].rstrip())
+            # print(movies_id)
+
+            top_movies = self.ratings.lst_sort(movies_id, 1, True)
 
             return top_movies
 

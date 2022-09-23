@@ -3,17 +3,17 @@ from movies import Movies
 from ratings import Ratings
 from tags import Tags
 
-import os
-import sys
-import urllib
-import requests
-from bs4 import BeautifulSoup as soup
-import json
-import pytest
-import collections
-import functools
-import datetime
-import re
+# import os
+# import sys
+# import urllib
+# import requests
+# from bs4 import BeautifulSoup as soup
+# import json
+# import pytest
+# import collections
+# import functools
+# import datetime
+# import re
 
 
 # Удалить перед сдачей
@@ -65,18 +65,19 @@ def main():
 
     # movie_class_bench(movies_path)
 
-    movies_class = Movies(movies_path)
+    movies_class = Movies(movies_path, has_order=True)
     # links_class = Links(links_path)
     ratings_class = Ratings(ratings_path)
     # tags_class = Tags(tags_path)
 
-    # print(movies_class.dist_by_release())
-    # print(movies_class.dist_by_genres())
-    # print(movies_class.most_genres(10))
+    print(movies_class.dist_by_release())
+    print(movies_class.dist_by_genres())
+    print(movies_class.most_genres(10))
 
     rating_movies_subclass = ratings_class.Movies(ratings_class)
-    # print(rating_movies_subclass.dist_by_year())
+    print(rating_movies_subclass.dist_by_year())
     print(rating_movies_subclass.dist_by_rating())
+    # print(rating_movies_subclass.top_by_num_of_ratings(10))
 
     print("\nSystem resources:")
     mem_rss = psutil.Process().memory_info().rss / float(2 ** 30)

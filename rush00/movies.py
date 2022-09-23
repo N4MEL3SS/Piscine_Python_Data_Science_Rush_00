@@ -8,43 +8,31 @@ class Movies:
 
     def __init__(self, path_to_the_file, has_order=True):
         self.path_file = path_to_the_file
-
+        self.header = ('movieId,title,genres')
         if has_order:
-            try:
-                with open(path_to_the_file, 'r', encoding='utf-8') as file:
-                    self.file_data = file.readlines()
-            except FileNotFoundError as err:
-                print(err)
+            self.file_data = self.file_open_ordinary()
+            self.file_data = [self.file_data[i].rstrip('\n') for i in range(0, len(self.file_data))]
+        else:
+            self.file_data = self.file_open_generator()
 
-    def file_open(self):
+    def file_open_generator(self):
         try:
             with open(self.path_file, 'r', encoding='utf-8') as file:
+                if file.readline().rstrip() != self.header:
+                    raise Exception("File structure error!")
                 for line in file:
-                    yield line
+                    yield line.rstrip("\n")
         except FileNotFoundError as err:
             print(err)
 
-    def get_file(self):
-        return self.file_data
-
-    def write_file(self, file_name, data_list):
+    def file_open_ordinary(self):
         try:
-            with open(f'../output_dataset/{file_name}', 'w') as output_file:
-                output_file.write("value\n")
-                for value in data_list:
-                    output_file.write(value)
-                    output_file.write("\n")
+            with open(self.path_file, 'r', encoding='utf-8') as file:
+                if file.readline().rstrip() != self.header:
+                    raise Exception("File structure error!")
+                return file.readlines()
         except FileNotFoundError as err:
             print(err)
-
-    # def spit_file(self):
-    #     file_list = []
-    #     line_list = []
-    #     for line in self.file_data:
-    #         line = line.rstrip()
-    #         line_list = line.split(',', maxsplit=1)
-    #         line_list.append(line_list.pop(1).rsplit(',', maxsplit=1))
-    #         print(line_list)
 
     def split_line(self):
         def split_one(row):
@@ -68,11 +56,6 @@ class Movies:
     # Makes a dictionary from a list where keys are list items and the values are counts
     # Sorts it by counts descendingly
     def lst_sort(self, lst, reverse=False):
-
-        # cnt = Counter(lst)
-        # dct = dict(cnt)
-        # dct_sorted_key = dict(sorted(dct.items(), key=lambda x: x[1], reverse=True))
-
         return dict(sorted(Counter(lst).items(), key=lambda x: x[1], reverse=reverse))
 
     def dict_sort(self, dct, reverse=False):
@@ -81,93 +64,44 @@ class Movies:
     # The method returns a dict or an OrderedDict where the keys are years and the values are counts.
     # You need to extract years from the titles. Sort it by counts descendingly.
     def dist_by_release(self):
-        # irina code
-        # lines = self.split_line()
-        # years = [line[1][-5:-1] if line[1][-1] == ')' else 'no year' for line in lines]
-        # release_years = self.lst_sort(years)
-        # print(release_years)
-
-        # salavat code
         years_list = []
         for line in self.file_data:
             if re.findall(r'\(\d{4}\)', line):
                 years_list.append(re.findall(r'\(\d{4}\)', line)[0].strip("()"))
             elif re.findall(r'\(\d{4}–\d{4}\)', line):
                 years_list.append(re.findall(r'\(\d{4}–\d{4}\)', line)[0].strip("()"))
-                # print(years_list)
             else:
                 years_list.append("year not specified")
         release_years = self.lst_sort(years_list, reverse=True)
-
-        # years_list = [re.findall(r'\(\d{4}\)', line)[0][1:-1] if re.findall(r'\(\d{4}\)', line) or re.findall(r'\(
-        # \d{4}–\d{4}\)', line) else "no year" for line in self.file_data[1:]]
-
-
-
-        # print(years_list)
-
-        # sub = Counter(years) == release_years
-        # print(sub)
 
         return release_years
 
     # The method returns a dict where the keys are genres and the values are counts.
     # Sort it by counts descendingly.
     def dist_by_genres(self):
-        # irina code
-        genres_lst = []
-        lines = self.split_line()
-        for line in lines:
-            genre = line[2].strip('()').split('|')
-            for g in genre:
-                genres_lst.append(g)
-        genres = self.lst_sort(genres_lst, reverse=True)
-        print("Irina")
-        # print(genres)
-
-        # salavat code
         genre_list = []
-        for line in self.file_data[1:]:
+        for line in self.file_data:
             for genre in line.rstrip().rsplit(',', maxsplit=1)[1].split('|'):
                 genre_list.append(genre)
-        # print(genre_list)
 
-        genres = self.lst_sort(genres_lst, reverse=True)
-        # print(genres)
+        genres = self.lst_sort(genre_list, reverse=True)
+
         return genres
 
     # The method returns a dict with top-n movies where the keys are movie titles and
     # the values are the number of genres of the movie. Sort it by numbers descendingly.
     def most_genres(self, n):
-        movie_dict = dict()
         lines = self.split_line()
 
+        most_genres = []
         for line in lines:
             if line[1][-1] == ')':
                 key = line[1][:-7]
             else:
                 key = line[1]
-            value = len(line[2].strip('()').split('|'))
-            # value = line[2].strip('()').count('|') + 1
-            movie_dict[key] = value
+            value = line[2].strip('()').count('|') + 1
+            most_genres.append([key, value])
 
-        # dct_sorted = dict(sorted(movie_dict.items(), key=lambda x: x[1], reverse=True))
-        dct_sorted = self.dict_sort(movie_dict, reverse=True)
-        keys = list(dct_sorted.keys())[:n]
-        values = list(dct_sorted.values())[:n]
-        movies = dict(zip(keys, values))
-
-        # print(movies)
-
-        # movie_list = []
-        # for line in self.file_data[1:]:
-        #     temp_list = line.rstrip().rsplit(',', maxsplit=1)
-        #     name = temp_list[0].split(',')[1]
-        #     if re.findall(r'\(\d{4}\)', name):
-        #         name = name[:-7].strip('"')
-        #     movie_list.append([name, temp_list[1].count('|') + 1])
-        #
-        # movie_list.sort()
-        # print(movie_list)
-
+        most_genres.sort(key=lambda x: x[1], reverse=True)
+        movies = dict(most_genres[:n])
         return movies
