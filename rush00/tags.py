@@ -109,20 +109,32 @@ class Tags:
         Drop the duplicates. It is a list of the tags. Sort it by tag names alphabetically.
         """
         lines = [row.split(',') for row in self.file_data[1:]]
-        tag_list = [line[2] for line in lines if line[2].find(word) >= 0]
+        # tag_list = [line[2] for line in lines if line[2].find(word) >= 0]
+        tag_list = [line[2] for line in lines]
+
+        tags_with_word = set()
+
+        for eq in tag_list:
+            for sep_word in eq.split(" "):
+                if sep_word.lower() == word.lower():
+                    tags_with_word.add(eq)
+
+
         # tag_list = [line[2] for line in lines]
         # tag_str = ('\n').join(tag_list)
         # for tag in tag_list:
         #     if re.findall(r'([W-w]ar)', tag):
         #         print(tag)
-        tags_with_word = list(sorted(set(tag_list)))
+
+        tags_with_word = list(sorted(tags_with_word))
         # или спилитить и искать по отдельным словам?
         return tags_with_word
 
+
 if __name__ == '__main__':
     t = Tags('../dataset/tags.csv')
-    print(t.most_words(10))
-    print(t.longest(10))
-    print(t.most_words_and_longest(10))
-    print(t.most_popular(10))
+    # print(t.most_words(10))
+    # print(t.longest(10))
+    # print(t.most_words_and_longest(10))
+    # print(t.most_popular(10))
     print(t.tags_with('war'))
