@@ -1,19 +1,9 @@
-#irina
-import re
 from collections import Counter
 
 class Tags:
     """
     Analyzing data from tags.csv
     """
-
-    # def __init__(self, path_to_the_file):
-    #     try:
-    #         with open(path_to_the_file, 'r') as file:
-    #             self.file_data = file.readlines()
-    #     except FileNotFoundError as err:
-    #         print(err)
-
     def __init__(self, path_to_the_file, has_order=True):
         self.path_file = path_to_the_file
         self.header = ('userId,movieId,tag,timestamp')
@@ -119,15 +109,8 @@ class Tags:
                 if sep_word.lower() == word.lower():
                     tags_with_word.add(eq)
 
-
-        # tag_list = [line[2] for line in lines]
-        # tag_str = ('\n').join(tag_list)
-        # for tag in tag_list:
-        #     if re.findall(r'([W-w]ar)', tag):
-        #         print(tag)
-
         tags_with_word = list(sorted(tags_with_word))
-        # или спилитить и искать по отдельным словам?
+
         return tags_with_word
 
 
