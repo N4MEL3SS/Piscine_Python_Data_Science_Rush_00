@@ -6,10 +6,34 @@ from collections import Counter
 class Movies:
     # Analyzing data from movies.csv
 
-    def __init__(self, path_to_the_file):
+    def __init__(self, path_to_the_file, has_order=True):
+        self.path_file = path_to_the_file
+
+        if has_order:
+            try:
+                with open(path_to_the_file, 'r', encoding='utf-8') as file:
+                    self.file_data = file.readlines()
+            except FileNotFoundError as err:
+                print(err)
+
+    def file_open(self):
         try:
-            with open(path_to_the_file, 'r', encoding='utf-8') as file:
-                self.file_data = file.readlines()
+            with open(self.path_file, 'r', encoding='utf-8') as file:
+                for line in file:
+                    yield line
+        except FileNotFoundError as err:
+            print(err)
+
+    def get_file(self):
+        return self.file_data
+
+    def write_file(self, file_name, data_list):
+        try:
+            with open(f'../output_dataset/{file_name}', 'w') as output_file:
+                output_file.write("value\n")
+                for value in data_list:
+                    output_file.write(value)
+                    output_file.write("\n")
         except FileNotFoundError as err:
             print(err)
 
@@ -43,23 +67,25 @@ class Movies:
 
     # Makes a dictionary from a list where keys are list items and the values are counts
     # Sorts it by counts descendingly
-    def count_sort(self, lst):
+    def lst_sort(self, lst, reverse=False):
 
-        cnt = Counter(lst)
-        dct = dict(cnt)
-        dct_sorted_key = dict(sorted(dct.items(), key=lambda x: x[1], reverse=True))
+        # cnt = Counter(lst)
+        # dct = dict(cnt)
+        # dct_sorted_key = dict(sorted(dct.items(), key=lambda x: x[1], reverse=True))
 
-        return dct_sorted_key
+        return dict(sorted(Counter(lst).items(), key=lambda x: x[1], reverse=reverse))
+
+    def dict_sort(self, dct, reverse=False):
+        return dict(sorted(dct.items(), key=lambda x: x[1], reverse=reverse))
 
     # The method returns a dict or an OrderedDict where the keys are years and the values are counts.
     # You need to extract years from the titles. Sort it by counts descendingly.
     def dist_by_release(self):
         # irina code
-        lines = self.split_line()
-        years = [line[1][-5:-1] if line[1][-1] == ')' else 'no year' for line in lines]
-        release_years = self.count_sort(years)
-        print("Irina")
-        print(release_years)
+        # lines = self.split_line()
+        # years = [line[1][-5:-1] if line[1][-1] == ')' else 'no year' for line in lines]
+        # release_years = self.lst_sort(years)
+        # print(release_years)
 
         # salavat code
         years_list = []
@@ -68,24 +94,18 @@ class Movies:
                 years_list.append(re.findall(r'\(\d{4}\)', line)[0].strip("()"))
             elif re.findall(r'\(\d{4}–\d{4}\)', line):
                 years_list.append(re.findall(r'\(\d{4}–\d{4}\)', line)[0].strip("()"))
-                print(years_list)
+                # print(years_list)
             else:
                 years_list.append("year not specified")
+        release_years = self.lst_sort(years_list, reverse=True)
 
         # years_list = [re.findall(r'\(\d{4}\)', line)[0][1:-1] if re.findall(r'\(\d{4}\)', line) or re.findall(r'\(
         # \d{4}–\d{4}\)', line) else "no year" for line in self.file_data[1:]]
 
-        try:
-            with open(f'../output_dataset/test.csv', 'w') as output_file:
-                output_file.write("value\n")
-                for value in years_list:
-                    output_file.write(value)
-                    output_file.write("\n")
-        except FileNotFoundError as err:
-            print(err)
+
 
         # print(years_list)
-        release_years = Counter(years_list)
+
         # sub = Counter(years) == release_years
         # print(sub)
 
@@ -101,19 +121,18 @@ class Movies:
             genre = line[2].strip('()').split('|')
             for g in genre:
                 genres_lst.append(g)
-        genres = self.count_sort(genres_lst)
+        genres = self.lst_sort(genres_lst, reverse=True)
         print("Irina")
-        print(genres)
+        # print(genres)
 
         # salavat code
         genre_list = []
         for line in self.file_data[1:]:
             for genre in line.rstrip().rsplit(',', maxsplit=1)[1].split('|'):
                 genre_list.append(genre)
+        # print(genre_list)
 
-        print(genre_list)
-
-        genres = Counter(genre_list)
+        genres = self.lst_sort(genres_lst, reverse=True)
         # print(genres)
         return genres
 
@@ -132,7 +151,8 @@ class Movies:
             # value = line[2].strip('()').count('|') + 1
             movie_dict[key] = value
 
-        dct_sorted = dict(sorted(movie_dict.items(), key=lambda x: x[1], reverse=True))
+        # dct_sorted = dict(sorted(movie_dict.items(), key=lambda x: x[1], reverse=True))
+        dct_sorted = self.dict_sort(movie_dict, reverse=True)
         keys = list(dct_sorted.keys())[:n]
         values = list(dct_sorted.values())[:n]
         movies = dict(zip(keys, values))

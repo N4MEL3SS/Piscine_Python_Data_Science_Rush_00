@@ -2,7 +2,10 @@ from links import Links
 from movies import Movies
 from ratings import Ratings
 from tags import Tags
+
+# Удалить перед сдачей
 import timeit
+import psutil
 
 
 class Test:
@@ -19,11 +22,27 @@ class Test:
             print(err)
 
 
-def benchmark(name, num, rand_list):
-    stmt = f'{name}({rand_list})'
-    code = f'from __main__ import {name}'
+def benchmark(function_name, class_name, path, num, args=None):
+    stmt = f'{class_name.capitalize()}.{function_name}({args})'
+    code = f'from {class_name} import {class_name.capitalize()}\n' \
+           f'{class_name.capitalize()}("{path}")\n'
     times = timeit.timeit(stmt=stmt, setup=code, number=num)
     return times
+
+
+def movie_class_bench(movies_path):
+    movies_class = Movies(movies_path)
+    print(movies_class.dist_by_release())
+    # print(benchmark('dist_by_release', 'movies', movies_path, 100))
+
+    mem_rss = psutil.Process().memory_info().rss / float(2 ** 30)
+    mem_vms = psutil.Process().memory_info().vms / float(2 ** 30)
+    cpu = psutil.Process().cpu_times()
+
+    print(f'Peak Real Memory Usage = {mem_rss:0.3f} Gb')
+    print(f'Peak Virtual Memory Usage = {mem_vms:0.3f} Gb')
+    print(f'User Time + System Time = {cpu.user + cpu.system:0.2f}s')
+
 
 def main():
     links_path = '../dataset/links.csv'
@@ -31,14 +50,25 @@ def main():
     ratings_path = '../dataset/ratings.csv'
     tags_path = '../dataset/tags.csv'
 
-    links_class = Links(links_path)
+    # movie_class_bench(movies_path)
+
     movies_class = Movies(movies_path)
-    ratings_class = Ratings(ratings_path)
-    tags_class = Tags(tags_path)
+    # links_class = Links(links_path)
+    # ratings_class = Ratings(ratings_path)
+    # tags_class = Tags(tags_path)
 
     print(movies_class.dist_by_release())
-    # print(movies_class.dist_by_genres())
-    # print(movies_class.most_genres(10))
+    print(movies_class.dist_by_genres())
+    print(movies_class.most_genres(10))
+
+    mem_rss = psutil.Process().memory_info().rss / float(2 ** 30)
+    mem_vms = psutil.Process().memory_info().vms / float(2 ** 30)
+    cpu = psutil.Process().cpu_times()
+
+    print()
+    print(f'Peak Real Memory Usage = {mem_rss:0.3f} Gb')
+    print(f'Peak Virtual Memory Usage = {mem_vms:0.3f} Gb')
+    print(f'User Time + System Time = {cpu.user + cpu.system:0.2f}s')
 
 
 if __name__ == '__main__':
