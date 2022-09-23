@@ -81,6 +81,7 @@ def main():
     # print(rating_movies_subclass.dist_by_rating())
     # print(rating_movies_subclass.top_by_num_of_ratings(10))
     print(rating_movies_subclass.top_by_ratings(30))
+    print(rating_movies_subclass.top_controversial(30))
 
     print("\nSystem resources:")
     mem_rss = psutil.Process().memory_info().rss / float(2 ** 30)

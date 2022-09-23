@@ -1,4 +1,5 @@
 #  salavat
+import collections
 import datetime
 from collections import Counter
 from movies import Movies
@@ -55,9 +56,6 @@ class Ratings:
                 data = datetime.datetime.fromtimestamp(timestamp)
                 years.append(str(data)[:4])
 
-            # years = [str(datetime.datetime.fromtimestamp(int(line.rsplit(',', maxsplit=1)[1].rstrip())))[:4] for
-            #     line in self.ratings.file_data[1:]]
-
             ratings_by_year = self.ratings.lst_sort(years, 0)
 
             return ratings_by_year
@@ -91,40 +89,83 @@ class Ratings:
 
             return top_movies
 
+        def median(self, lst):
+            sorted_lst = sorted(lst)
+            lst_len = len(lst)
+            index = (len(lst) - 1) // 2
+
+            if lst_len % 2:
+                return sorted_lst[index]
+            else:
+                return (sorted_lst[index] + sorted_lst[index + 1]) / 2.0
+
         # The method returns top-n movies by the average or median of the ratings.
         # It is a dict where the keys are movie titles and the values are metric values.
         # Sort it by metric descendingly.
         # The values should be rounded to 2 decimals.
         def top_by_ratings(self, n, metric='average'):
-            top_movies = {}
+            id_rates = []
+            movies = {}
 
-            dict_test = {}
-            temp_list = [line.split(',') for line in self.ratings.file_data]
-            temp_list.sort(key=lambda x: x[1])
-            print(temp_list[:5])
+            for line in self.ratings.file_data:
+                info = line.split(',')
+                id_rates.append((info[1], info[2]))
 
-            temp_movie_id = temp_list[0][1]
-            for temp in temp_list:
-                movie_id, rating_score = temp[1], float(temp[2])
-                if movie_id != temp_movie_id:
-                    dict_test[temp_movie_id] = round(dict_test[temp_movie_id][0] / dict_test[temp_movie_id][1], 2)
-                    temp_movie_id = movie_id
-                if dict_test.get(movie_id):
-                    dict_test[movie_id] = [dict_test[movie_id][0] + rating_score, dict_test[movie_id][1] + 1]
-                    # print(movie_id, dict_test[movie_id])
-                else:
-                    dict_test[movie_id] = [rating_score, 1]
-                    # print(movie_id, dict_test[movie_id])
-                print(dict_test)
+            id_rat_dict = collections.defaultdict(list)
+            for i in range(len(id_rates)):
+                id_rat_dict[id_rates[i][0]].append(float(id_rates[i][1]))
+
+            if metric == 'average':
+                for k, v in id_rat_dict.items():
+                    movies[k] = round(sum(v) / len(v), 2)
+            elif metric == 'median':
+                for k, v in id_rat_dict.items():
+                    movies[k] = round(self.median(v), 2)
+            else:
+                raise ValueError('No such metric')
+
+            y = {}
+            for k in movies.keys():
+                y[self.movie_title[k]] = movies[k]
+
+            x = {k: v for k, v in sorted(y.items(), key=lambda item: item[1], reverse=True)}
+            top_movies = dict(collections.Counter(x).most_common(n))
 
             return top_movies
+
+        def variance(self, data):
+            mean = sum(data) / len(data)
+            deviations = [(x - mean) ** 2 for x in data]
+
+            return sum(deviations) / len(data)
 
         # The method returns top-n movies by the variance of the ratings.
         # It is a dict where the keys are movie titles and the values are the variances.
         # Sort it by variance descendingly.
         # The values should be rounded to 2 decimals.
         def top_controversial(self, n):
-            top_movies = {}
+            id_rates = []
+            movies = {}
+
+            for line in self.ratings.file_data:
+                info = line.split(',')
+                id_rates.append((info[1], info[2]))
+
+            id_rat_dict = collections.defaultdict(list)
+
+            for i in range(len(id_rates)):
+                id_rat_dict[id_rates[i][0]].append(float(id_rates[i][1]))
+
+            for k, v in id_rat_dict.items():
+                movies[k] = round(self.variance(v), 2)
+
+            y = {}
+
+            for k in movies.keys():
+                y[self.movie_title[k]] = movies[k]
+
+            x = {k: v for k, v in sorted(y.items(), key=lambda item: item[1], reverse=True)}
+            top_movies = dict(collections.Counter(x).most_common(n))
 
             return top_movies
 
