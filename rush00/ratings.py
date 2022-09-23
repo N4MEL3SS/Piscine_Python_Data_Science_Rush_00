@@ -42,6 +42,9 @@ class Ratings:
     def lst_sort(self, lst, key, reverse=False):
         return dict(sorted(Counter(lst).items(), key=lambda x: x[key], reverse=reverse))
 
+    def dict_sort(self, dct, reverse=False):
+        return dict(sorted(dct.items(), key=lambda x: x[1], reverse=reverse))
+
     class Movies:
         def __init__(self, ratings, movie_title=None):
             self.ratings = ratings
@@ -169,10 +172,74 @@ class Ratings:
 
             return top_movies
 
+
     # In this class, three methods should work.
-    # The 1st returns the distribution of users by the number of ratings made by them.
-    # The 2nd returns the distribution of users by average or median ratings made by them.
-    # The 3rd returns top-n users with the biggest variance of their ratings.
     # Inherit from the class Movies. Several methods are similar to the methods from it.
-    class Users:
-        pass
+    class Users(Movies):
+
+        def __init__(self, ratings, movie_title=None):
+            self.ratings = ratings
+            self.movie_title = movie_title
+
+        # The 1st returns the distribution of users by the number of ratings made by them.
+        def users_rating_count(self):
+            users = {}
+            users_id = []
+            for line in self.ratings.file_data:
+                users_id.append(line.split(',', maxsplit=1)[0].rstrip())
+            ratings_user = self.ratings.lst_sort(Counter(users_id), 1, True)
+            return ratings_user
+
+        # The 2nd returns the distribution of users by average or median ratings made by them.
+        def users_metric_count(self, metric='average'):
+            users_rates = []
+            users = {}
+
+            for line in self.ratings.file_data:
+                info = line.split(',')
+                users_rates.append((info[0], info[2]))
+
+            id_rat_dict = collections.defaultdict(list)
+            for i in range(len(users_rates)):
+                id_rat_dict[users_rates[i][0]].append(float(users_rates[i][1]))
+
+            if metric == 'average':
+                for k, v in id_rat_dict.items():
+                    users[k] = round(sum(v) / len(v), 2)
+            elif metric == 'median':
+                for k, v in id_rat_dict.items():
+                    users[k] = round(self.median(v), 2)
+            else:
+                raise ValueError('No such metric')
+
+            sorted_users = self.ratings.dict_sort(users, True)
+            return sorted_users
+
+        # The 3rd returns top-n users with the biggest variance of their ratings.
+        def users_variance_count(self, n):
+            users_rates = []
+            users = {}
+
+            for line in self.ratings.file_data:
+                info = line.split(',')
+                users_rates.append((info[0], info[2]))
+
+            id_rat_dict = collections.defaultdict(list)
+
+            for i in range(len(users_rates)):
+                id_rat_dict[users_rates[i][0]].append(float(users_rates[i][1]))
+
+            for k, v in id_rat_dict.items():
+                users[k] = round(self.variance(v), 2)
+
+            top_users = dict(collections.Counter(users).most_common(n))
+
+            return top_users
+
+
+# if __name__ == '__main__':
+#     r = Ratings('../dataset/ratings.csv')
+#     u = r.Users(r)
+#     print(u.users_rating_count())
+#     print(u.users_metric_count('median'))
+#     print(u.users_variance_count(10))
