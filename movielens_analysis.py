@@ -6,6 +6,7 @@ from random import choices
 from bs4 import BeautifulSoup
 import requests
 
+
 class Movies:
     # Analyzing data from movies.csv
 
@@ -691,4 +692,18 @@ class Links:
 
 
 class Test:
-    pass
+    def setup_class(self):
+        self.tags = Tags("ml-latest-small/tags.csv")
+        self.movies = Movies('ml-latest-small/movies.csv')
+        self.ratings = Ratings('ml-latest-small/ratings.csv')
+        self.ratings_subclass_movie = self.ratings.Movies(self.ratings, 'ml-latest-small/movies.csv')
+        self.links = Links('ml-latest-small/links.csv', 'ml-latest-small/movies.csv')
+        self.list_of_fields = ['movieId', 'Director', 'Budget', 'Cumulative Worldwide Gross', 'Runtime']
+
+    # ______________________________________
+    # Test for Movies class
+    # ______________________________________
+
+    def test_0_movies_dist_by_release(self):
+        if not isinstance(self.movies.dist_by_release(), dict):
+            raise ValueError("Error type")
