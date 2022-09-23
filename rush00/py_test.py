@@ -2,7 +2,7 @@ from links import Links
 from movies import Movies
 from ratings import Ratings
 from tags import Tags
-import config
+import timeit
 
 
 class Test:
@@ -19,10 +19,26 @@ class Test:
             print(err)
 
 
+def benchmark(name, num, rand_list):
+    stmt = f'{name}({rand_list})'
+    code = f'from __main__ import {name}'
+    times = timeit.timeit(stmt=stmt, setup=code, number=num)
+    return times
+
 def main():
-    file_path = "../dataset/ratings.csv"
-    rating_class = Ratings(file_path)
-    print(rating_class.Movies.dist_by_year())
+    links_path = '../dataset/links.csv'
+    movies_path = '../dataset/movies.csv'
+    ratings_path = '../dataset/ratings.csv'
+    tags_path = '../dataset/tags.csv'
+
+    links_class = Links(links_path)
+    movies_class = Movies(movies_path)
+    ratings_class = Ratings(ratings_path)
+    tags_class = Tags(tags_path)
+
+    print(movies_class.dist_by_release())
+    # print(movies_class.dist_by_genres())
+    # print(movies_class.most_genres(10))
 
 
 if __name__ == '__main__':
