@@ -43,7 +43,7 @@ class Ratings:
         return dict(sorted(Counter(lst).items(), key=lambda x: x[key], reverse=reverse))
 
     class Movies:
-        def __init__(self, ratings, movie_title):
+        def __init__(self, ratings, movie_title=None):
             self.ratings = ratings
             self.movie_title = movie_title
 
