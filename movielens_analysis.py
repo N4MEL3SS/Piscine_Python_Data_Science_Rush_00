@@ -7,6 +7,11 @@ from bs4 import BeautifulSoup
 import requests
 
 
+# -------------------------------#
+#         Movies class          #
+# -------------------------------#
+
+
 class Movies:
     # Analyzing data from movies.csv
 
@@ -127,6 +132,11 @@ class Movies:
         return movies
 
 
+# -------------------------------#
+#        Ratings class          #
+# -------------------------------#
+
+
 class Ratings:
     # Analyzing data from ratings.csv
 
@@ -176,7 +186,7 @@ class Ratings:
             for line in self.ratings.file_data:
                 timestamp = int(line.rsplit(',', maxsplit=1)[1].rstrip())
                 data = datetime.datetime.fromtimestamp(timestamp)
-                years.append(str(data)[:4])
+                years.append(int(str(data)[:4]))
 
             ratings_by_year = self.ratings.lst_sort(years, 0)
 
@@ -187,9 +197,9 @@ class Ratings:
         def dist_by_rating(self):
             ratings_list = []
             for line in self.ratings.file_data:
-                ratings_list.append(line.rsplit(',', maxsplit=2)[1].rstrip())
+                ratings_list.append(float(line.rsplit(',', maxsplit=2)[1].rstrip()))
 
-            ratings_distribution = self.ratings.lst_sort(ratings_list, 1)
+            ratings_distribution = self.ratings.lst_sort(ratings_list, 0)
 
             return ratings_distribution
 
@@ -304,11 +314,10 @@ class Ratings:
 
         # The 1st returns the distribution of users by the number of ratings made by them.
         def users_rating_count(self):
-            users = {}
             users_id = []
             for line in self.ratings.file_data:
-                users_id.append(line.split(',', maxsplit=1)[0].rstrip())
-            ratings_user = self.ratings.lst_sort(Counter(users_id), 1, True)
+                users_id.append(int(line.split(',', maxsplit=1)[0].rstrip()))
+            ratings_user = self.ratings.lst_sort(Counter(users_id), 1, False)
             return ratings_user
 
         # The 2nd returns the distribution of users by average or median ratings made by them.
@@ -343,7 +352,7 @@ class Ratings:
 
             for line in self.ratings.file_data:
                 info = line.split(',')
-                users_rates.append((info[0], info[2]))
+                users_rates.append((int(info[0]), info[2]))
 
             id_rat_dict = defaultdict(list)
 
@@ -356,6 +365,11 @@ class Ratings:
             top_users = dict(Counter(users).most_common(n))
 
             return top_users
+
+
+# -------------------------------#
+#          Tags class           #
+# -------------------------------#
 
 
 class Tags:
@@ -471,6 +485,11 @@ class Tags:
         tags_with_word = list(sorted(tags_with_word))
 
         return tags_with_word
+
+
+# -------------------------------#
+#          Links class          #
+# -------------------------------#
 
 
 class Links:
@@ -696,7 +715,8 @@ class Test:
         self.tags = Tags("ml-latest-small/tags.csv")
         self.movies = Movies('ml-latest-small/movies.csv')
         self.ratings = Ratings('ml-latest-small/ratings.csv')
-        self.ratings_subclass_movie = self.ratings.Movies(self.ratings, 'ml-latest-small/movies.csv')
+        self.ratings_subclass_movie = self.ratings.Movies(self.ratings, self.movies.get_movies_title())
+        self.ratings_subclass_user = self.ratings.Users(self.ratings)
         self.links = Links('ml-latest-small/links.csv', 'ml-latest-small/movies.csv')
         self.list_of_fields = ['movieId', 'Director', 'Budget', 'Cumulative Worldwide Gross', 'Runtime']
 
@@ -704,6 +724,303 @@ class Test:
     # Test for Movies class
     # ______________________________________
 
-    def test_0_movies_dist_by_release(self):
-        if not isinstance(self.movies.dist_by_release(), dict):
-            raise ValueError("Error type")
+    def test__dist_by_release_type(self):
+        result = self.movies.dist_by_release()
+        assert isinstance(result, dict)
+
+    def test__dist_by_release_sorted(self):
+        result = self.movies.dist_by_release()
+        releases = list(result.values())
+        sort_state = True
+        for i in range(1, len(releases)):
+            if releases[i - 1] < releases[i]:
+                sort_state = False
+                break
+        assert sort_state
+
+    def test__dist_by_genres_type(self):
+        result = self.movies.dist_by_genres()
+        assert isinstance(result, dict)
+
+    def test__dist_by_genres_sorted(self):
+        result = self.movies.dist_by_genres()
+        releases = list(result.values())
+        sort_state = True
+        for i in range(1, len(releases)):
+            if releases[i - 1] < releases[i]:
+                sort_state = False
+                break
+        assert sort_state
+
+    def test__most_genres_type(self):
+        result = self.movies.most_genres(10)
+        assert isinstance(result, dict)
+
+    def test__most_genres_sorted(self):
+        result = self.movies.most_genres(25)
+        releases = list(result.values())
+        sort_state = True
+        for i in range(1, len(releases)):
+            if releases[i - 1] < releases[i]:
+                sort_state = False
+                break
+        assert sort_state
+
+    def test__movies__dist_by_years__types(self):
+        result = self.ratings_subclass_movie.dist_by_year()
+        assert isinstance(result, dict)
+
+        is_correct_types = True
+        for year, count in result.items():
+            if not isinstance(year, int) or not isinstance(count, int):
+                print(year, count)
+                is_correct_types = False
+                break
+        assert is_correct_types
+
+    def test__movies__dist_by_years__is_sorted(self):
+        result = self.ratings_subclass_movie.dist_by_year()
+
+        keys = list(result.keys())
+        is_sorted = True
+        for i in range(1, len(keys)):
+            if keys[i - 1] > keys[i]:
+                is_sorted = False
+                break
+        assert is_sorted
+
+    def test__movies__dist_by_rating__types(self):
+        result = self.ratings_subclass_movie.dist_by_rating()
+        assert isinstance(result, dict)
+
+        is_correct_types = True
+        for rating, count in result.items():
+            if not isinstance(rating, float) or not isinstance(count, int):
+                is_correct_types = False
+                break
+        assert is_correct_types
+
+    def test__movies__dist_by_rating__is_sorted(self):
+        result = self.ratings_subclass_movie.dist_by_rating()
+
+        keys = list(result.keys())
+        is_sorted = True
+        for i in range(1, len(keys)):
+            if keys[i - 1] > keys[i]:
+                is_sorted = False
+                break
+        assert is_sorted
+
+    def test__movies__top_by_num_of_ratings__types(self):
+        result = self.ratings_subclass_movie.top_by_num_of_ratings(10)
+        print(result)
+        assert isinstance(result, dict)
+
+        is_correct_types = True
+        for rating, count in result.items():
+            if not isinstance(rating, str) or not isinstance(count, int):
+                is_correct_types = False
+                break
+        assert is_correct_types
+
+        assert len(result) == 10
+
+    def test__movies__top_by_num_of_ratings__is_sorted(self):
+        result = self.ratings_subclass_movie.top_by_num_of_ratings(10)
+        values = list(result.values())
+        is_sorted = True
+        for i in range(1, len(values)):
+            if values[i - 1] < values[i]:
+                is_sorted = False
+                break
+        assert is_sorted
+
+        assert len(result) == 10
+
+    def test__movies__top_by_ratings__types(self):
+        result = self.ratings_subclass_movie.top_by_ratings(10)
+        assert isinstance(result, dict)
+
+        is_correct_types = True
+        for rating, count in result.items():
+            if not isinstance(rating, str) or not isinstance(count, float):
+                is_correct_types = False
+                break
+        assert is_correct_types
+
+        assert len(result) == 10
+
+    def test__movies__top_by_ratings__is_sorted(self):
+        result = self.ratings_subclass_movie.top_by_ratings(10)
+
+        values = list(result.values())
+        is_sorted = True
+        for i in range(1, len(values)):
+            if values[i - 1] < values[i]:
+                is_sorted = False
+                break
+        assert is_sorted
+
+        assert len(result) == 10
+
+    def test__movies__top_controversial__types(self):
+        result = self.ratings_subclass_movie.top_controversial(10)
+
+        assert isinstance(result, dict)
+
+        is_correct_types = True
+        for rating, count in result.items():
+            if not isinstance(rating, str) or not isinstance(count, float):
+                is_correct_types = False
+                break
+        assert is_correct_types
+
+        assert len(result) == 10
+
+    def test__movies__top_controversial__is_sorted(self):
+        result = self.ratings_subclass_movie.top_controversial(10)
+
+        values = list(result.values())
+        is_sorted = True
+        for i in range(1, len(values)):
+            if values[i - 1] < values[i]:
+                is_sorted = False
+                break
+        assert is_sorted
+
+        assert len(result) == 10
+
+    def test__users__dist_by_ratings_number__types(self):
+        result = self.ratings_subclass_user.users_rating_count()
+        assert isinstance(result, dict)
+
+        is_correct_types = True
+        for rating, count in result.items():
+            if not isinstance(rating, int) or not isinstance(count, int):
+                is_correct_types = False
+                break
+        assert is_correct_types
+
+    def test__users__dist_by_ratings_number__is_sorted(self):
+        result = self.ratings_subclass_user.users_rating_count()
+
+        values = list(result.values())
+        is_sorted = True
+        for i in range(1, len(values)):
+            if values[i - 1] > values[i]:
+                is_sorted = False
+                break
+        assert is_sorted
+
+    def test__users__top_by_variance__types(self):
+        result = self.ratings_subclass_user.users_variance_count(10)
+        assert isinstance(result, dict)
+
+        is_correct_types = True
+        for rating, count in result.items():
+            if not isinstance(rating, int) or not isinstance(count, float):
+                is_correct_types = False
+                break
+        assert is_correct_types
+
+        assert len(result) == 10
+
+    def test__users__top_by_variance__is_sorted(self):
+        result = self.ratings_subclass_user.users_variance_count(10)
+
+        values = list(result.values())
+        is_sorted = True
+        for i in range(1, len(values)):
+            if values[i - 1] < values[i]:
+                is_sorted = False
+                break
+        assert is_sorted
+
+        assert len(result) == 10
+
+    def test__most_words__types(self):
+        result = self.tags.most_words(10)
+        assert isinstance(result, dict)
+
+    def test__most_words__is_sorted(self):
+        result = self.tags.most_words(10)
+
+        sorted_list = True
+        words = list(result.values())
+        for i in range(1, len(words)):
+            if words[i - 1] < words[i]:
+                sorted_list = False
+                break
+        assert sorted_list
+
+    def test__longest__types(self):
+        result = self.tags.longest(10)
+        assert isinstance(result, list)
+
+    def test__longest__is_sorted(self):
+        result = self.tags.longest(10)
+        sorted_list = True
+        for i in range(1, len(result)):
+            if len(result[i - 1]) < len(result[i]):
+                sorted_list = False
+                break
+        assert sorted_list
+
+    def test_most_words_and_longest_types(self):
+        result = self.tags.most_words_and_longest(10)
+        assert isinstance(result, list)
+
+    def test_most_words_and_longest_duplicates(self):
+        my_list = self.tags.most_words_and_longest(10)
+        test_set = set(my_list)
+        assert len(my_list) == len(test_set)
+
+    def test_most_popular_type(self):
+        result = self.tags.most_popular(10)
+        assert isinstance(result, dict)
+
+    def test_most_popular_duplicates(self):
+        my_list = list(self.tags.most_popular(10).keys())
+        test_set = set(my_list)
+        assert len(my_list) == len(test_set)
+
+    def test_most_popular_sorted(self):
+        result = self.tags.most_popular(10)
+
+        tag = list(result.values())
+        sorted_list = True
+        for i in range(1, len(tag)):
+            if tag[i - 1] < tag[i]:
+                sorted_list = False
+                break
+
+        assert sorted_list
+
+        assert len(result) == 10
+
+    def test_tags_with_out(self):
+        word = 'comedy'
+        result = self.tags.tags_with(word)
+        check_word = True
+        for i in range(len(result)):
+            if word not in result[i].lower():
+                check_word = False
+                break
+        assert check_word
+
+    def test_tags_with_type(self):
+        result = self.tags.tags_with('comedy')
+        assert isinstance(result, list)
+
+    def test_tags_with_dupl(self):
+        my_list = list(self.tags.tags_with('comedy'))
+        test_set = set(my_list)
+        assert len(my_list) == len(test_set)
+
+    def test_tags_with_sorted(self):
+        result = self.tags.tags_with('comedy')
+        sort_list = True
+        for i in range(1, len(result)):
+            if result[i - 1][0] > result[i][0]:
+                sort_list = False
+        assert sort_list
